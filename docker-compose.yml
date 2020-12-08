@@ -1,0 +1,28 @@
+#
+# This docker-compose file isn't for running the stack-backend project, see the README for more details
+# Instead this defines the relevant services this depends on, so you can easily run unit-tests
+#
+version: "3"
+services:
+  localstack:
+    image: localstack/localstack
+    container_name: onin-localstack
+    restart: always
+    privileged: true
+    environment:
+      SERVICES: iam,dynamodb,apigateway,s3,ssm,cloudformation,lambda,sts,cloudwatch,stepfunctions
+      DEFAULT_REGION: us-east-1
+      LAMBDA_EXECUTOR: docker-reuse
+      # LOCALSTACK_API_KEY:
+      DEBUG: 1
+      HOST_TMP_FOLDER: ${TMPDIR}
+    network_mode: bridge
+    ports:
+      - "127.0.0.1:4566:4566"
+      - "127.0.0.1:4567:8080"
+      - "4510:4510"
+      - "4568:4568"
+      - "443:443"
+    volumes:
+      # - '${TMPDIR:-/tmp/localstack}:/tmp/localstack'
+      - "/var/run/docker.sock:/var/run/docker.sock"

@@ -1,0 +1,43 @@
+service: localstack-websockets
+
+provider:
+  name: aws
+  deploymentBucket:
+    name: localstack-websockets-serverless
+  runtime: nodejs12.x
+  websocketsApiName: dev-localstack-websockets-websockets
+  environment:
+    WEBSOCKETS_API_URL:
+      Fn::Join:
+        [
+          "",
+          [
+            "https://",
+            { Ref: WebsocketsApi },
+            ".execute-api.us-east-1.amazonaws.com/${self:provider.stage}",
+          ],
+        ]
+
+package:
+  exclude:
+    - .venv/**
+
+plugins:
+  - serverless-deployment-bucket
+  - serverless-localstack
+
+custom:
+  localstack:
+    stages: [local]
+    # mountCode: True
+
+functions:
+  connectionHandler:
+    handler: handler.handler
+    events:
+      - websocket:
+          route: $connect
+      - websocket:
+          route: $disconnect
+      - websocket:
+          route: $default
